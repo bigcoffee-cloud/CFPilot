@@ -9,10 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/energye/systray"
-
 	"github.com/xmwengxing/cfpilot/packages/desktop/internal/autostart"
 	"github.com/xmwengxing/cfpilot/packages/desktop/internal/mesh"
+	"github.com/xmwengxing/cfpilot/packages/desktop/internal/systray"
 )
 
 // meshdAddr 与 server 的 mesh_variant_mesh.go 一致。

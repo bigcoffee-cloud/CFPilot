@@ -12,7 +12,7 @@
 | tag | 触发的工作流 | 产出 |
 |---|---|---|
 | `v<版本>` | Publish npm | npm 发布两个 CLI 包 |
-| `desktop-v<版本>` | Release Desktop | 三平台桌面版 exe + Android APK，追加到 `v<版本>` 同一个 Release |
+| `desktop-v<版本>` | Release Desktop | Windows / Linux / macOS 桌面版 + Android APK，追加到 `v<版本>` 同一个 Release |
 | （push main 本身） | CI | 类型检查 / 测试 / 哈希自检 |
 
 ### 操作步骤
@@ -44,7 +44,7 @@ git push origin main --follow-tags
 # 工作流状态（三个都要 success）
 gh run list --limit 5
 
-# Release 资产齐全（三平台 exe + APK + zip + SHA256SUMS）
+# Release 资产齐全（Windows / Linux / macOS + APK + zip + SHA256SUMS）
 gh release view v<版本> --json assets --jq '.assets[].name'
 ```
 

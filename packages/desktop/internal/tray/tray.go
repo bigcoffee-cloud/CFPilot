@@ -28,10 +28,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energye/systray"
-
 	"github.com/xmwengxing/cfpilot/packages/desktop/internal/scan"
 	"github.com/xmwengxing/cfpilot/packages/desktop/internal/server"
+	"github.com/xmwengxing/cfpilot/packages/desktop/internal/systray"
 )
 
 // App 把托盘与服务连起来。
@@ -278,6 +277,11 @@ func (a *App) Run() {
 		}
 	}()
 	systray.Run(a.onReady, func() {})
+	if systray.Failed() {
+		a.mu.Lock()
+		a.failed = true
+		a.mu.Unlock()
+	}
 }
 
 // Failed 报告托盘是否启动失败（供 main 决定是否降级）。

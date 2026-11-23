@@ -232,11 +232,17 @@ const meshSuffix = meshVariant ? '+mesh' : ''
 // Linux 的 `cfp_gui` 标签：启用系统 WebKitGTK 窗口（purego 运行时 dlopen）。
 // ⚠️ 带这个标签的产物会因 purego 而链接 glibc（libc / libdl / libpthread），
 //    不能放进 Alpine 容器 —— 容器用的静态产物在下面单独编，见 stageDocker。
-const allTargets = [
+// macOS 不带 cfp_gui：面板用系统浏览器，菜单栏在运行时 dlopen AppKit
+// （packages/desktop/internal/systray）。CGO 仍然关闭，所以不必装 Apple SDK。
+// +mesh 要虚拟网卡；macOS 的 utun 还没做，不进入 --mesh 的安装包目标。
+const desktopTargets = [
   { goos: 'windows', goarch: 'amd64', out: `cfpilot-${version}${meshSuffix}-windows-amd64.exe`, extra: ['-H=windowsgui'], tags: [] },
   { goos: 'linux', goarch: 'amd64', out: `cfpilot-${version}${meshSuffix}-linux-amd64`, extra: [], tags: ['cfp_gui'] },
   { goos: 'linux', goarch: 'arm64', out: `cfpilot-${version}${meshSuffix}-linux-arm64`, extra: [], tags: ['cfp_gui'] },
+  { goos: 'darwin', goarch: 'arm64', out: `cfpilot-${version}${meshSuffix}-darwin-arm64`, extra: [], tags: [], mesh: false },
+  { goos: 'darwin', goarch: 'amd64', out: `cfpilot-${version}${meshSuffix}-darwin-amd64`, extra: [], tags: [], mesh: false },
 ]
+const allTargets = meshVariant ? desktopTargets.filter((t) => t.mesh !== false) : desktopTargets
 const targets = allTargets
 
 // 允许限制构建目标（只编一部分平台时用）。
@@ -502,6 +508,9 @@ for (const t of picked) {
   if (t.goos === 'linux' && !meshVariant) {
     stageDocker(t)
   }
+  if (t.goos === 'darwin') {
+    assertMachO(outPath, t.goarch)
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -671,6 +680,35 @@ function assertNoWebkitLinked(path) {
  *
  * 镜像基于 Alpine（musl），任何 glibc 依赖都会让 exec 失败。
  */
+/**
+ * darwin 产物必须是 64 位 Mach-O，并且 CPU 类型与目标架构一致。
+ *
+ * 交叉编译失败时有时仍会留下一个空文件或错误格式的文件，
+ * 这里直接看文件头，不依赖能在 Linux 上运行 macOS 程序。
+ */
+function assertMachO(path, goarch) {
+  const buf = readFileSync(path)
+  if (buf.length < 8) {
+    console.error(`[desktop] ❌ ${path} 太小，不是 Mach-O`)
+    process.exit(1)
+  }
+  const magic = buf.readUInt32LE(0)
+  const MH_MAGIC_64 = 0xfeedfacf
+  if (magic !== MH_MAGIC_64) {
+    console.error(`[desktop] ❌ ${path} 不是 64 位 Mach-O（magic=0x${magic.toString(16)}）`)
+    process.exit(1)
+  }
+  const cpu = buf.readUInt32LE(4)
+  const CPU_TYPE_X86_64 = 0x01000007
+  const CPU_TYPE_ARM64 = 0x0100000c
+  const want = goarch === 'arm64' ? CPU_TYPE_ARM64 : CPU_TYPE_X86_64
+  if (cpu !== want) {
+    console.error(`[desktop] ❌ ${path} 的 CPU 类型是 0x${cpu.toString(16)}，期望 ${goarch} (0x${want.toString(16)})`)
+    process.exit(1)
+  }
+  console.log(`[desktop] ✅ Mach-O ${goarch}（magic=0xfeedfacf cpu=0x${cpu.toString(16)}）`)
+}
+
 function assertFullyStatic(path) {
   const info = readElfNeeded(readFileSync(path))
   if (!info) {

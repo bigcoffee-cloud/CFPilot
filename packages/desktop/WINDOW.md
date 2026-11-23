@@ -16,6 +16,7 @@
 
 - Windows：`github.com/jchv/go-webview2`（纯 Go，Wails 内部同款）。
 - Linux：`github.com/crgimenes/glaze`（purego，运行时 dlopen WebKitGTK）。
+- macOS：不链 WKWebView（那要 Apple SDK 和 CGO）。菜单栏用 purego 在运行时 dlopen AppKit，面板打开系统浏览器。产物是 `cfpilot-<v>-darwin-arm64` 与 `cfpilot-<v>-darwin-amd64`。
 
 ## 2. 两个产物（普通版 / +mesh）怎么区分
 

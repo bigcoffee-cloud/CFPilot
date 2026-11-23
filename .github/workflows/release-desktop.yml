@@ -5,7 +5,7 @@ name: Release Desktop
 # 触发条件：推送 desktop-v* tag（如 desktop-v0.5.5）。
 # 与 release-gui.yml 并列存在，互不干扰：
 #   - gui-v*     → Electron 版（Windows exe，收尾阶段仍发布）
-#   - desktop-v* → Go 版（Windows + Linux）
+#   - desktop-v* → Go 版（Windows + Linux + macOS）
 #
 # 版本政策沿用「单一版本源」：tag 里的版本号必须与根 package.json 一致。
 
@@ -121,7 +121,7 @@ jobs:
           "$(go env GOPATH)/bin/go-winres" --help > /dev/null
           echo "go-winres 已安装：$(go env GOPATH)/bin/go-winres"
 
-      - name: 交叉编译三平台产物
+      - name: 交叉编译 Windows、Linux 与 macOS 产物
         run: node scripts/build-desktop.mjs
 
       - name: 校验 windows 产物已内嵌图标（硬校验，防静默回归）
@@ -504,7 +504,7 @@ jobs:
             printf '%s\n\n' "$BODY"
             printf -- '---\n\n'
             printf '**下载说明**：\n'
-            printf -- '- **普通版**（代理部署 / 优选 / 盲中继与云监测台）：Windows 下载 `cfpilot-%s-windows-amd64.exe` 双击运行；Linux 下载对应架构二进制并 `chmod +x`；Android 下载 `cfpilot-%s-android.apk`。\n' "$VERSION" "$VERSION"
+            printf -- '- **普通版**（代理部署 / 优选 / 盲中继与云监测台）：Windows 下载 `cfpilot-%s-windows-amd64.exe` 双击运行；Linux 下载对应架构二进制并 `chmod +x`；macOS 下载 `cfpilot-%s-darwin-arm64`（Apple 芯片）或 `cfpilot-%s-darwin-amd64`（Intel），`chmod +x` 后执行 `xattr -d com.apple.quarantine`；Android 下载 `cfpilot-%s-android.apk`。\n' "$VERSION" "$VERSION" "$VERSION" "$VERSION"
             printf -- '- **+mesh 组网版**（含异地组网）：Windows 下载 `cfpilot-%s+mesh-windows-amd64-setup.exe` 安装运行；Linux 下载对应架构 `.deb`（amd64 / arm64）安装；Android 下载 `cfpilot-%s+mesh-android.apk`（独立组网客户端）。\n' "$VERSION" "$VERSION"
             printf -- '- **转发内核**：`CFPilot-control.zip` / `CFPilot-dataplane.zip` 与独立热更新通道 `kernel-latest` 同步发布。\n\n'
             printf 'CLI 工具：`npm i -g cfpilot`（组网版 `npm i -g cfpilot-mesh`），然后运行 `cfpilot` 进入中文菜单。\n'
