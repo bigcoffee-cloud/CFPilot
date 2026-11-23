@@ -144,11 +144,14 @@ cfpilot config      # 配置管理
 | Windows x64 | `cfpilot-<版本>-windows-amd64.exe`（绿色单文件） | `cfpilot-<版本>+mesh-windows-amd64-setup.exe`（安装向导） |
 | Linux x64 | `cfpilot-<版本>-linux-amd64` | `cfpilot-<版本>+mesh-linux-amd64.deb` |
 | Linux arm64 | `cfpilot-<版本>-linux-arm64` | `cfpilot-<版本>+mesh-linux-arm64.deb` |
+| macOS Apple 芯片 | `cfpilot-<版本>-darwin-arm64` | 尚未提供（组网需要的虚拟网卡还没做） |
+| macOS Intel | `cfpilot-<版本>-darwin-amd64` | 尚未提供（组网需要的虚拟网卡还没做） |
 | Android | `cfpilot-<版本>-android.apk`（完整管理面板） | `cfpilot-<版本>+mesh-android.apk`（独立组网客户端） |
 
 运行后托盘出现图标，并直接打开 CFPilot 面板窗口；关掉窗口后服务继续在托盘里运行。
 
 Linux 普通版下载后要先 `chmod +x`，操作流程见下面的 [Linux 版](#linux-版)。
+macOS 下载后要去掉隔离标记，操作流程见下面的 [macOS 版](#macos-版)。
 Linux 的面板窗口用系统 WebKitGTK；没装 WebKitGTK 或没有图形会话时，
 会自动回退成系统浏览器打开同一个面板（功能一致）。
 `--browser` 可强制使用系统浏览器。
@@ -229,6 +232,32 @@ GNOME 默认不支持（Ubuntu 自带的 AppIndicator 扩展默认启用，所�
 | 日志    | `~/.cfpilot-gui/cfpilot.log`（自动滚动）；加 `--console` 时同步打终端                |
 | 应用内更新 | 只**下载**到 `~/.cfpilot-gui/updates/`；替换需手动：退出程序 → `chmod +x` 新文件 → 覆盖旧文件 |
 | 卸载    | 删除二进制 + `~/.cfpilot-gui/` 目录即可，不写注册表 / 系统目录                            |
+
+### macOS 版
+
+macOS 版与 Windows / Linux 共用同一份 Go 源码和同一份界面。菜单栏在程序启动后
+用系统自带的 AppKit 画出来（运行时加载，不把 Cocoa 链进二进制），面板用系统浏览器打开。
+因此构建机不需要装 Xcode，产物仍是 `CGO_ENABLED=0` 的单个 Mach-O 文件。
+Apple 芯片下载 `darwin-arm64`，Intel Mac 下载 `darwin-amd64`。
+
+浏览器下载的文件会被隔离，第一次要去掉隔离标记再加执行位：
+
+```bash
+# Apple 芯片。Intel Mac 把文件名里的 arm64 换成 amd64。
+mkdir -p ~/Applications
+mv ~/Downloads/cfpilot-<版本>-darwin-arm64 ~/Applications/cfpilot
+chmod +x ~/Applications/cfpilot
+xattr -d com.apple.quarantine ~/Applications/cfpilot
+~/Applications/cfpilot
+```
+
+启动后菜单栏出现 CFPilot，浏览器打开面板。退出用菜单里的「退出 CFPilot」。
+没有图形会话时用 `~/Applications/cfpilot --no-tray`。登录自启写在
+`~/Library/LaunchAgents/com.cfpilot.desktop.plist`（+mesh 菜单里的「开机自启」；
+普通版不注册该项）。
+
++mesh 组网版还没有 macOS 包：组网要创建 utun 虚拟网卡，这一层尚未实现。
+部署、优选、盲中继与云监测台走上面的普通版。
 
 ### Docker 版
 

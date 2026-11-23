@@ -113,7 +113,7 @@ go run ./cmd/cfpilot --check
 
 ```bash
 npm run build -w @cfpilot/ui       # 先出界面产物
-node scripts/build-desktop.mjs     # 再编三平台
+node scripts/build-desktop.mjs     # 再编 Windows / Linux / macOS
 ```
 
 产物在 `packages/desktop/dist/`：
@@ -122,6 +122,8 @@ node scripts/build-desktop.mjs     # 再编三平台
 cfpilot-<版本>-windows-amd64.exe
 cfpilot-<版本>-linux-amd64        # 带 cfp_gui，有窗口能力
 cfpilot-<版本>-linux-arm64
+cfpilot-<版本>-darwin-arm64       # Apple 芯片；菜单栏 + 系统浏览器
+cfpilot-<版本>-darwin-amd64       # Intel Mac
 ```
 
 同时会另编一份**不带 `cfp_gui` 的静态 Linux 产物**到 `docker/dist/<arch>/cfpilot`，
@@ -152,7 +154,8 @@ git push origin desktop-v0.5.6
 ```
 
 CI（`.github/workflows/release-desktop.yml`）在 `ubuntu-latest` 上
-交叉编译三平台、**实跑 Linux 产物做冒烟测试**，然后自动发布 Release。
+交叉编译 Windows、Linux 与 macOS，**实跑 Linux 产物做冒烟测试**，
+并检查 macOS 产物的 Mach-O 文件头，然后自动发布 Release。
 
 ## 技术选型备注
 

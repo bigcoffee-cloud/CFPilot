@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	github.com/crgimenes/glaze v0.0.84
+	github.com/ebitengine/purego v0.11.3
 	github.com/energye/systray v1.0.3
 	github.com/flynn/noise v1.1.0
 	github.com/gorilla/websocket v1.5.3
@@ -15,7 +16,6 @@ require (
 )
 
 require (
-	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/jchv/go-winloader v0.0.0-20250406163304-c1995be93bd1 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.12 // indirect

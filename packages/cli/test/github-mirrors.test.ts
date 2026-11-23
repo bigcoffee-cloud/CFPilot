@@ -101,6 +101,11 @@ describe('desktopAssetName', () => {
   it('linux 不带扩展名', () => {
     expect(desktopAssetName('0.8.1', 'linux', 'arm64')).toBe('cfpilot-0.8.1-linux-arm64')
   })
+
+  it('macOS 不带扩展名', () => {
+    expect(desktopAssetName('0.8.1', 'darwin', 'arm64')).toBe('cfpilot-0.8.1-darwin-arm64')
+    expect(desktopAssetName('0.8.1', 'darwin', 'amd64')).toBe('cfpilot-0.8.1-darwin-amd64')
+  })
 })
 
 describe('fetchLatestVersionWithoutApi', () => {

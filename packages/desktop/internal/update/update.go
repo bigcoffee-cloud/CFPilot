@@ -167,6 +167,7 @@ func Check(ctx context.Context, current string) *CheckResult {
 // 按平台筛选资产：
 //   - Windows 用 `windows-amd64.exe`
 //   - Linux 用 `linux-<arch>`
+//   - macOS 用 `darwin-<arch>`
 //
 // tag 前缀同时兼容 `desktop-v*` 与旧的 `gui-v*`。
 func fetchReleases(ctx context.Context) ([]Release, error) {
